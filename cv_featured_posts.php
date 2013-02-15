@@ -65,8 +65,6 @@ class Caava_featured_Widget extends WP_Widget {
 			<div class="content">
 				<?php if(!empty($intro)){ ?><p><?php echo wpautop( $intro ); ?></p><?php } ?>
 					<?php
-					//wp_reset_query();
-					//wp_reset_postdata();
 					$args = array('posts_per_page'=>$post_count,'post__in' => $featured_posts );
 					$cv_featured = new WP_Query( $args );
 					$output_html = '';
@@ -121,10 +119,7 @@ class Caava_featured_Widget extends WP_Widget {
 		$instance['intro'] = (isset($new_instance['intro'])) ? sanitize_text_field( $new_instance['intro'] ) : '';
 
 		$instance['post_count'] = isset( $new_instance['post_count'] ) ? intval($new_instance['post_count']) : 5;
-		
 
-		
-		
 		return $instance;
 	}
 
@@ -173,6 +168,15 @@ if(function_exists("register_field_group")){
 				'type' => 'relationship',
 				'instructions' => 'Select the posts to be displayed as within the blog sidebar',
 				'required' => '0',
+				'post_type' => 
+				array (
+					0 => 'post',
+				),
+				'taxonomy' => 
+				array (
+					0 => 'all',
+				),
+				'max' => 5,
 			),
 			1 => 
 			array (
