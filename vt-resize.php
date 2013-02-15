@@ -19,7 +19,7 @@
  * @param bool $crop
  * @return array
  */
-
+if(!function_exists('vt_resize')){
 function vt_resize( $attach_id = null, $img_url = null, $width, $height, $crop = false ) {
 
 	// this is an attachment, so we have the ID
@@ -31,10 +31,15 @@ function vt_resize( $attach_id = null, $img_url = null, $width, $height, $crop =
 		$file_path = parse_url( $img_url );
 		$file_path = ltrim( $file_path['path'], '/' );
 		//$file_path = rtrim( ABSPATH, '/' ).$file_path['path'];
-		$orig_size = getimagesize( $file_path );
-		$image_src[0] = $img_url;
-		$image_src[1] = $orig_size[0];
-		$image_src[2] = $orig_size[1];
+
+		if(is_file($file_path)){
+			$orig_size = getimagesize( $file_path );
+			$image_src[0] = $img_url;
+			$image_src[1] = $orig_size[0];
+			$image_src[2] = $orig_size[1];
+		}else{
+			return false;
+		}
 	}
 
 	$file_info = pathinfo( $file_path );
@@ -106,4 +111,5 @@ function vt_resize( $attach_id = null, $img_url = null, $width, $height, $crop =
 		'height' => $image_src[2]
 	);
 	return $vt_image;
+}
 }
