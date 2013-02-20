@@ -7,9 +7,14 @@ Author: Brandon Lavigne
 Author URI: http://caavadesign.com
 */
 
-if(!function_exists('get_fields'))
-require_once('acf/acf-lite.php');
+add_action('init','include_acf_lite');
 
+function include_acf_lite(){
+	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	if (!is_plugin_active('advanced-custom-fields/acf.php')) {
+		require_once('acf/acf-lite.php');
+	}
+}
 
 if(!function_exists('vt_resize'))
 	require_once('vt-resize.php');
@@ -26,6 +31,14 @@ if(!function_exists('cv_post_first_image')){
 	}
 }
 
+if(!function_exists('add_site_url')){
+	function add_site_url($url) {
+		if (!preg_match("~^".home_url('/')."~i", $url)) {
+			$url = home_url('/') . $url;
+		}
+		return $url;
+	}
+}
 add_action( 'widgets_init', 'caava_featured_widget' );
 
 
@@ -58,8 +71,8 @@ class Caava_featured_Widget extends WP_Widget {
 			echo $before_title . $title . $after_title;
 
 		$featured_posts = get_field('featured_posts','options');
-		$image_dimensions = (get_field('image_dimensions','options')) ? get_field('image_dimensions','options')[0] : false;
-		$optional_display = (get_field('optional_display','options')) ? get_field('optional_display','options')[0] : false;
+		$image_dimensions = get_field('image_dimensions','options'); $image_dimensions = $image_dimensions[0];
+		$optional_display = get_field('optional_display','options'); $optional_display = $optional_display[0];
 
 		?>
 			<div class="content">
@@ -90,10 +103,12 @@ class Caava_featured_Widget extends WP_Widget {
 							}
 
 							
+							
 								$crop = vt_resize($thumb_id, $img_url, $image_dimensions['width'], $image_dimensions['height'], $image_dimensions['crop']);
-
+								$img = add_site_url($crop["url"]);
+								
 							$output_html .= '<div class="cv-featured"><a href="'.get_post_permalink().'" class="cv-image">';
-							$output_html .= '<img src="'.home_url('/').$crop["url"].'" width="'.$image_dimensions['width'].'" height="'.$image_dimensions['height'].'" /></a>';
+							$output_html .= '<img src="'.$img.'" width="'.$image_dimensions['width'].'" height="'.$image_dimensions['height'].'" /></a>';
 
 							if($optional_display['show_date'])
 								$output_html .= '<div class="cv-date"><a href="'.get_post_permalink().'">'.get_the_date( $optional_display['date_format'] ).'</a></div>';
@@ -135,8 +150,7 @@ class Caava_featured_Widget extends WP_Widget {
 		<label for="<?php echo $this->get_field_id( 'intro' ); ?>">Intro:</label>
 		<input id="<?php echo $this->get_field_id( 'intro' ); ?>" name="<?php echo $this->get_field_name( 'intro' ); ?>" value="<?php echo $instance['intro']; ?>" class="widefat" style="width:100%;" />
 		</p>
-		<p><label for="<?php echo $this->get_field_id( 'post_count' ); ?>">Post Count:</label>
-		<input id="<?php echo $this->get_field_id( 'post_count' ); ?>" name="<?php echo $this->get_field_name( 'post_count' ); ?>" value="<?php echo $instance['post_count']; ?>" class="widefat" style="width:10%;" /></p>
+		<p><a href="<?php echo home_url('/'); ?>wp-admin/admin.php?page=acf-options-featured-posts">Configure Widget</a></p>
 	<?php
 	}
 }
@@ -243,7 +257,7 @@ if(function_exists("register_field_group")){
 			),
 			2 => 
 			array (
-				'key' => 'field_16',
+				'key' => 'cv_field_16',
 				'label' => 'Optional Display',
 				'name' => 'optional_display',
 				'type' => 'repeater',
@@ -265,7 +279,7 @@ if(function_exists("register_field_group")){
 				),
 				'sub_fields' => 
 				array (
-					'field_17' => 
+					'cv_field_17' => 
 					array (
 						'label' => 'Show Title',
 						'name' => 'show_title',
@@ -273,9 +287,9 @@ if(function_exists("register_field_group")){
 						'instructions' => '',
 						'column_width' => '',
 						'order_no' => 0,
-						'key' => 'field_17',
+						'key' => 'cv_field_17',
 					),
-					'field_18' => 
+					'cv_field_18' => 
 					array (
 						'label' => 'Show Date',
 						'name' => 'show_date',
@@ -283,9 +297,9 @@ if(function_exists("register_field_group")){
 						'instructions' => '',
 						'column_width' => '',
 						'order_no' => 1,
-						'key' => 'field_18',
+						'key' => 'cv_field_18',
 					),
-					'field_19' => 
+					'cv_field_19' => 
 					array (
 						'label' => 'Date Format',
 						'name' => 'date_format',
@@ -294,7 +308,7 @@ if(function_exists("register_field_group")){
 						'default_value' => get_option( 'date_format' ),
 						'column_width' => '',
 						'order_no' => 1,
-						'key' => 'field_19',
+						'key' => 'cv_field_19',
 					)
 				),
 				'row_min' => 1,
